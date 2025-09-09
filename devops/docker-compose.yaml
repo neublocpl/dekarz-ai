@@ -1,0 +1,15 @@
+services:
+  dekarz-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../src:/app/src
+      - ../data:/app/data
+    environment:
+      - PYTHONPATH=/app
+    env_file:
+      - ../.env
+    restart: unless-stopped
