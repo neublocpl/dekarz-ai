@@ -1,4 +1,5 @@
 # Custom MDM Project ignores
+.vscode
 /data
 
 # Byte-compiled / optimized / DLL files

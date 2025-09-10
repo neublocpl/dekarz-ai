@@ -1,15 +1,58 @@
 services:
-  dekarz-api:
+  api:
+    container_name: dekarz-ai-api
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: ./devops/Dockerfile
+    command: ["uvicorn", "src.api.app:app", "--host", "0.0.0.0", "--port", "8080", "--reload"]
     ports:
       - "8080:8080"
     volumes:
       - ../src:/app/src
-      - ../data:/app/data
+      - ../data/files:/app/data
     environment:
       - PYTHONPATH=/app
+    env_file:
+      - ../.env
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - postgres
+
+  worker:
+    container_name: dekarz-ai-worker
+    build:
+      context: ..
+      dockerfile: ./devops/Dockerfile
+    command: ["poetry", "run", "celery", "-A", "src.celery_app.app", "worker", "--loglevel=info"]
+    volumes:
+      - ../src:/app/src
+      - ../data/files:/app/data
+    environment:
+      - PYTHONPATH=/app
+    env_file:
+      - ../.env
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - postgres
+
+  redis:
+    container_name: dekarz-ai-redis
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+    volumes:
+      - ../data/redis:/data
+    restart: unless-stopped
+
+  postgres:
+    container_name: dekarz-ai-postgres
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - ../data/db:/var/lib/postgresql/data
     env_file:
       - ../.env
     restart: unless-stopped

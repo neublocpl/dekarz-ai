@@ -2,12 +2,10 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY pyproject.toml poetry.lock ./
+COPY devops/pyproject.toml devops/poetry.lock ./
 
 RUN pip install poetry && \
     poetry config virtualenvs.create false && \
     poetry install --no-interaction --no-ansi --no-root
 
-EXPOSE 8080
-
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8080", "--reload"]
+COPY src .
