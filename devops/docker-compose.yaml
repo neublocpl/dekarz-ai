@@ -28,6 +28,7 @@ services:
     volumes:
       - ../src:/app/src
       - ../data/files:/app/data
+      - ../data/models:/app/models
     environment:
       - PYTHONPATH=/app
     env_file:

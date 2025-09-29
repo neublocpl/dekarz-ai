@@ -14,7 +14,7 @@ def digitalize_roof_plan_task(job_id: str, file_url: str):
     try:
         crud.update_job_status(db, job_id=job_id, status=JobStatus.IN_PROGRESS)
 
-        result = MainPipeline().run(file_url=file_url)
+        result = MainPipeline().run(file_url=file_url, job_uuid=job_id)
         result_dict = result.dict()
         
         crud.update_job_status(db, job_id=job_id, status=JobStatus.SUCCESS, result=result_dict)

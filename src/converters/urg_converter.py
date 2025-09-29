@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
-from src.schemas.urg import URG
+from src.schemas import URG
 
 
-class AbstractConverter(ABC):
+class AbstractUrgConverter(ABC):
     @abstractmethod
-    def run(self) -> URG:
+    def run(self, input_data: Any) -> URG:
         raise NotImplementedError("Subclasses must implement this method")

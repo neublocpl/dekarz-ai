@@ -23,6 +23,7 @@ DATA_DIR = Path("/app/data")
 INPUT_FILES_DIR = DATA_DIR / "input"
 TEST_FILES_DIR = DATA_DIR / "test"
 DEBUG_FILES_DIR = DATA_DIR / "debug"
+MODEL_FILES_DIR = DATA_DIR / "models"
 
 STATIC_FILES_DIR = {
     "input": INPUT_FILES_DIR,
@@ -30,3 +31,8 @@ STATIC_FILES_DIR = {
     "debug": DEBUG_FILES_DIR,
 }
 
+
+# --- AI Model ---
+
+MODELS_DIR = Path("/app/models")
+UNNECESESARY_ELEMENTS_MODEL_PATH = MODELS_DIR / "task_01_rcnn.pth"
