@@ -5,7 +5,7 @@ import numpy as np
 from paddleocr import PaddleOCR
 from pdf2image import convert_from_path
 from pathlib import Path
-
+import matplotlib.pyplot as plt
 
 def create_elegant_visualization(image, results):
     """
@@ -22,7 +22,7 @@ def create_elegant_visualization(image, results):
         # This function now expects pre-cleaned data, but a safety check is good practice.
         try:
             box = np.array(res[0], dtype=np.int32)
-            text, confidence = res[1]
+            text = res[1]
         except (ValueError, TypeError) as e:
             print(
                 f"⚠️ Warning: Skipping a result with invalid box format during visualization. Error: {e}. Data: {res}")
@@ -60,37 +60,30 @@ def process_image_in_tiles(ocr_engine, image, tile_size=1024, overlap=100):
     all_results = []
 
     step_size = tile_size - overlap
-
+    i = 0
     for y in range(0, h, step_size):
         for x in range(0, w, step_size):
             y_end = min(y + tile_size, h)
             x_end = min(x + tile_size, w)
             tile = image[y:y_end, x:x_end]
-
+            plt.imsave(f"tile_{i}.png", tile)
+            i += 1
             tile_results = ocr_engine.predict(tile)
-
+            print(f"LEN {len(tile_results)}")
             if tile_results and tile_results[0] is not None:
-                for res in tile_results[0]:
-                    try:
-                        # FIX: This entire block is now wrapped in a try-except.
-                        # This robustly handles any malformed coordinate (e.g., 'i')
-                        # by skipping the entire invalid detection box.
-                        box = res[0]
-                        adjusted_box = []
-                        for point in box:
-                            # Attempt to convert and adjust each point.
-                            adj_x = float(point[0]) + x
-                            adj_y = float(point[1]) + y
-                            adjusted_box.append([adj_x, adj_y])
-
-                        # If successful, update the result with the new coordinates and add it.
-                        res[0] = adjusted_box
-                        all_results.append(res)
-                    except (ValueError, TypeError) as e:
-                        # If any coordinate is invalid (e.g., 'i'), skip this detection and warn the user.
-                        print(f"⚠️ Warning: Skipping malformed coordinate data. Error: {e}. Data: {res}")
-                        continue
-
+                for k, v in tile_results[0].items():
+                    print(f"k: {k}")
+                    print(f"v: {v}")
+                for text, box in zip(tile_results[0]["rec_texts"], tile_results[0]["rec_polys"]):
+                    cv2.polylines(tile, [np.array(box, dtype=np.int32)], isClosed=True, color=(0, 255, 120), thickness=2)
+                    cv2.putText(tile, text, (box[0][0], box[0][1]), cv2.FONT_HERSHEY_SIMPLEX, 2, (128, 128, 128), 1, cv2.LINE_AA)
+                    plt.imsave(f"tile_end_{i}.png", tile)
+                    adjusted_box = []
+                    for point in box:
+                        adj_x = float(point[0]) + x
+                        adj_y = float(point[1]) + y
+                        adjusted_box.append([adj_x, adj_y])
+                    all_results.append((adjusted_box, text))
     return all_results
 
 
